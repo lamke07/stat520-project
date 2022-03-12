@@ -1,21 +1,22 @@
 library(here)
 library(readr)
 library(tidyverse)
-# library(network)
 library(igraph)
 
 rm(list = ls())
 
+# Read raw data
 raw_edges <- read_csv(here("data", "kelch_IBD_graph.csv"))
 raw_nodes <- read_csv(here("data", "meta_data.csv"))
 
 ################################################################################
+# Get list of nodes
 A_nodes <- raw_nodes %>%
   mutate(id = row_number()) %>%
-  # mutate(id = paste0("V", row_number())) %>%
   rename(label = Sample) %>%
   relocate(id)
 
+# Get list of edges
 A_edges <- raw_edges %>%
   rename(source = V1, target = V2, weight = Probability_of_edge) %>%
   left_join(A_nodes %>%
@@ -25,13 +26,15 @@ A_edges <- raw_edges %>%
               dplyr::select(label, to = id),
             by = c("target" = "label"))
 
+# Formatted nodes and edges for igraph package
 edges <- A_edges %>%
   dplyr::select(from, to, weight)
 
 nodes <- A_nodes %>%
   dplyr::select(id, label)
-################################################################################
 
+################################################################################
+# Function to get number of nodes in the LCC of the graph
 get_LCC_size <- function(nodes, edges, threshold){
   edge_thresh <- edges %>%
     mutate(weight = as.integer(weight > threshold)) %>%
@@ -46,15 +49,18 @@ lcc_sizes <- purrr::map_dbl(1-2^(-seq(1:20)), ~get_LCC_size(nodes, edges, thresh
 
 lcc_sizes_df <- tibble(threshold = 1-2^(-seq(1:20)), power = seq(1:20), lcc_sizes = lcc_sizes)
 
+# Plot the number of nodes in the LCC for each threshold
 p <- ggplot(lcc_sizes_df) +
   geom_line(aes(x = power, y = lcc_sizes)) +
   labs(x = "Threshold (1 - 2^(-x))", y = "LCC Size", title = "Thresholding the Edge Weights") +
   theme_light()
 
 ggsave(p, filename = here("fig", "threshold.pdf"), width = 6, height = 3, dpi = "retina")
+
 ################################################################################
+# Extract LCC with threshold 1-2^(-16)
 edges_select <- edges %>%
-  mutate(weight = as.integer(weight > 1-2^(-10))) %>%
+  mutate(weight = as.integer(weight > 1-2^(-16))) %>%
   filter(weight == 1)
 
 graph_select <- graph_from_data_frame(d = edges_select, vertices = nodes, directed = FALSE)
@@ -72,10 +78,8 @@ gorder(graph_select)
 gsize(graph_select_lcc)
 gorder(graph_select_lcc)
 
-A_lcc <- as_adjacency_matrix(graph_select_lcc, type = "both", sparse = FALSE)
+A_lcc <- as_adjacency_matrix(graph_select_lcc, type = "upper", sparse = FALSE)
 
-saveRDS(A_lcc, file = here("data", "A_lcc.rds"))
-################################################################################
-################################################################################
+saveRDS(A_lcc, file = here("data", "A_lcc_16.rds"))
 ################################################################################
 
