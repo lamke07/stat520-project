@@ -1,0 +1,24 @@
+
+model{
+  # Priors
+  for(i in 1:K){
+    for(j in 1:K){
+      Omega[i,j] ~ dunif(0.8,1)
+    }
+  }
+  
+  for(i in 1:N){
+    g[i] ~ dcat(pi)
+  }
+  
+  pi[1:K] ~ ddirch(alpha[1:K])
+  # Likelihood
+  for(i in 1:N){
+    for(j in (i+1):N){
+      A[i,j] ~ dbern(Omega[g[i],g[j]])
+    }
+  }
+  
+  
+}
+
