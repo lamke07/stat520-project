@@ -20,15 +20,25 @@ get_jags_model <- function(A_lcc, K, n.iter, n.burnin){
   
   ################################################################################
   # Setup initial parameters
-  Omega = matrix(0.5, K,K)
-  g = sample(1:K, N, replace = TRUE)
+  set.seed(555)
+  Omega1 = matrix(runif(K*K, 0,1), K,K)
+  g1 = sample(1:K, N, replace = TRUE)
   
-  inits = list(Omega = Omega, g = g)
-  inits_all = list(inits, inits, inits)
+  set.seed(666)
+  Omega2 = matrix(runif(K*K, 0,1), K,K)
+  g2 = sample(1:K, N, replace = TRUE)
+  
+  set.seed(777)
+  Omega3 = matrix(runif(K*K, 0,1), K,K)
+  g3 = sample(1:K, N, replace = TRUE)
+  
+  inits1 = list(Omega = Omega1, g = g1)
+  inits2 = list(Omega = Omega2, g = g2)
+  inits3 = list(Omega = Omega3, g = g3)
+  inits_all = list(inits1, inits2, inits3)
   bayes.mod.params <- c("Omega", "g")
   ################################################################################
   # Compile the model
-  
   
   model.name <- "1_sbm.bugs"
   
@@ -45,8 +55,8 @@ get_jags_model <- function(A_lcc, K, n.iter, n.burnin){
 
 # test_run <- get_jags_model(A_lcc = A_lcc, K = 5, n.iter = 90, n.burnin = 10)
 safe_get_jags_model <- safely(.f = get_jags_model)
-res_models <- purrr::map(seq(4,20,4), ~safe_get_jags_model(A_lcc = A_lcc, K = .x, n.iter = 9000, n.burnin = 1000))
+res_models <- purrr::map(seq(4,20,4), ~safe_get_jags_model(A_lcc = A_lcc, K = .x, n.iter = 20000, n.burnin = 5000))
 
 
-# saveRDS(res_models, "res_models.rds")
+saveRDS(res_models, "res_models_2022_03_12.rds")
 ################################################################################
