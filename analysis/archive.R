@@ -45,4 +45,7 @@
 #                        data = lcc_dat, inits = inits_all, parameters.to.save = bayes.mod.params,
 #                        n.chains = 3, n.iter = 9000, n.burnin = 1000)
 
+# for(i in 1:97){
+#   print(table(clusters[,i]))
+# }
 

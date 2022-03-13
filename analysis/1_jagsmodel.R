@@ -24,7 +24,7 @@ model{
   
   pi[1:K] ~ ddirch(alpha[1:K])
   # Likelihood
-  for(i in 1:N){
+  for(i in 1:(N-1)){
     for(j in (i+1):N){
       A[i,j] ~ dbern(Omega[g[i],g[j]])
     }
