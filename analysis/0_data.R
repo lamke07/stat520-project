@@ -81,5 +81,7 @@ gorder(graph_select_lcc)
 A_lcc <- as_adjacency_matrix(graph_select_lcc, type = "upper", sparse = FALSE)
 
 saveRDS(A_lcc, file = here("data", "A_lcc_16.rds"))
+saveRDS(graph_select_lcc, file = here("data", "A_lcc_16_network.rds"))
+
 ################################################################################
 
