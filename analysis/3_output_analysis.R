@@ -3,22 +3,15 @@ library(tidyverse)
 library(stringi)
 library(MCMCprecision)
 rm(list = ls())
+
 # res_output <- readRDS(here::here("analysis", "res_models.rds"))
 res_output <- readRDS(here::here("analysis", "res_models_2022_03_12.rds"))
-A_lcc <- readRDS(here("data", "A_lcc_16.rds"))
 
+A_lcc <- readRDS(here("data", "A_lcc_16.rds"))
 rownames(A_lcc) <- NULL
 colnames(A_lcc) <- NULL
 
 res_output_results <- purrr::map(res_output, "result")
-
-# output1 <- res_output_results[[1]]
-# 
-# # Use this
-# names(output1$BUGSoutput$sims.list)
-# nrow(output1$BUGSoutput$sims.list$g)
-# names(output1$BUGSoutput)
-# rownames(output1$BUGSoutput$summary)
 
 ################################################################################
 # Model Summaries
@@ -58,8 +51,6 @@ p <- res_output_deviance %>%
 
 ggsave(p, filename = here("fig", "deviance_traceplot.pdf"), width = 6, height = 4, dpi = "retina")
 
-dim(res_output_results[[1]]$BUGSoutput$sims.list$Omega)
-
 p1 <- res_output_results[[1]]$BUGSoutput$sims.matrix %>%
   as_tibble() %>%
   dplyr::select(contains("Omega")) %>% 
@@ -85,19 +76,6 @@ p2 <- res_output_results[[1]]$BUGSoutput$sims.matrix %>%
   theme_light() 
 
 ggsave(p2, filename = here("fig", "mod1_omega_trace.pdf"), width = 8, height = 8.5, dpi = "retina")
-
-# res_output_results[[2]]$BUGSoutput$sims.matrix %>%
-#   as_tibble() %>%
-#   dplyr::select(starts_with("g")) %>% 
-#   mutate(sample_nr = row_number()) %>%
-#   pivot_longer(-c("sample_nr"), names_to = "Parameter", values_to = "par_value") %>%
-#   mutate(g_node = as.numeric(stri_extract_first_regex(Parameter, "[0-9]+"))) %>%
-#   filter(g_node <= 25) %>%
-#   ggplot() +
-#   geom_line(aes(x = sample_nr, y = par_value)) +
-#   facet_wrap(~g_node) +
-#   theme_light()
-
 
 ################################################################################
 # DIC
@@ -136,8 +114,8 @@ res_output_DIC <- purrr::map_dbl(1:5, ~res_output_results[[.x]]$BUGSoutput$DIC)
 # 
 # model_lik <- purrr::map_dbl(1:500, ~generate_sample_prior_lik(A = A_lcc, N = nrow(A_lcc), K = 4))
 
+# clusters <- res_output_results[[5]]$BUGSoutput$sims.list$g
 ################################################################################
-clusters <- res_output_results[[5]]$BUGSoutput$sims.list$g
 
 compute_psm <- function(cluster_output){
   # Compute posterior similarity matrix for a cluster output
