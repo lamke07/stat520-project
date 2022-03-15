@@ -1,4 +1,3 @@
-setwd("~/Downloads/GitHub/stat520-project/analysis")
 library(here)
 library(rjags)
 library(coda)
